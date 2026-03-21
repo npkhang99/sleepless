@@ -2,31 +2,20 @@
 //  sleeplessApp.swift
 //  sleepless
 //
-//  Created by Nguyễn Phúc Khang on 22/3/26.
-//
 
 import SwiftUI
-import SwiftData
 
 @main
 struct sleeplessApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+    init() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier!).count > 1 {
+            NSApp.terminate(nil)
         }
-    }()
+    }
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-        .modelContainer(sharedModelContainer)
+        Settings { EmptyView() }
     }
 }
