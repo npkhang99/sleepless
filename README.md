@@ -47,6 +47,25 @@ Outputs:
 
 You can still open `sleepless.xcodeproj` in Xcode and build with Cmd+B.
 
+## Releasing
+
+Use the `Release` workflow in GitHub Actions and run it manually.
+
+Required inputs:
+
+- `tag` such as `v1.0.0`
+- `title` for the GitHub release
+
+Optional inputs:
+
+- `notes` to override auto-generated release notes
+- `prerelease` to mark the release as a prerelease
+
+The workflow builds the app, packages a DMG, creates a GitHub Release, and attaches:
+
+- `Sleepless-<tag>.app.zip`
+- `Sleepless-<tag>.dmg`
+
 ## License
 
 MIT

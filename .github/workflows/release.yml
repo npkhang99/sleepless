@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (for example, v1.0.0)
+        required: true
+        type: string
+      title:
+        description: Release title
+        required: true
+        type: string
+      notes:
+        description: Release notes (leave blank to auto-generate)
+        required: false
+        type: string
+      prerelease:
+        description: Mark this release as a prerelease
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build Sleepless
+        run: make build
+
+      - name: Package release assets
+        id: package
+        run: |
+          make package
+
+          app_zip="dist/Sleepless-${{ inputs.tag }}.app.zip"
+          dmg_path="dist/Sleepless-${{ inputs.tag }}.dmg"
+
+          ditto -c -k --sequesterRsrc --keepParent \
+            "build/Build/Products/Release/Sleepless.app" \
+            "$app_zip"
+
+          mv "dist/Sleepless.dmg" "$dmg_path"
+
+          echo "app_zip=$app_zip" >> "$GITHUB_OUTPUT"
+          echo "dmg_path=$dmg_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: Sleepless-${{ inputs.tag }}
+          path: |
+            ${{ steps.package.outputs.app_zip }}
+            ${{ steps.package.outputs.dmg_path }}
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_TITLE: ${{ inputs.title }}
+          RELEASE_NOTES: ${{ inputs.notes }}
+          RELEASE_PRERELEASE: ${{ inputs.prerelease }}
+          APP_ZIP: ${{ steps.package.outputs.app_zip }}
+          DMG_PATH: ${{ steps.package.outputs.dmg_path }}
+        run: |
+          flags=(
+            --target "$GITHUB_SHA"
+            --title "$RELEASE_TITLE"
+          )
+
+          if [[ "$RELEASE_PRERELEASE" == "true" ]]; then
+            flags+=(--prerelease)
+          fi
+
+          if [[ -n "$RELEASE_NOTES" ]]; then
+            gh release create "$RELEASE_TAG" "$APP_ZIP" "$DMG_PATH" \
+              "${flags[@]}" \
+              --notes "$RELEASE_NOTES"
+          else
+            gh release create "$RELEASE_TAG" "$APP_ZIP" "$DMG_PATH" \
+              "${flags[@]}" \
+              --generate-notes
+          fi
