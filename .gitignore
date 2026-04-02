@@ -1,0 +1,28 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserdatad/
+*.xcuserstate
+
+# Xcode workspace settings generated locally
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Xcode build products and archives
+build/
+DerivedData/
+dist/
+*.moved-aside
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager
+.build/
+
+# Keep shared schemes in source control for CI/build automation
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/xcshareddata/**

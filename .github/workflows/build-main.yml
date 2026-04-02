@@ -1,0 +1,59 @@
+name: Build on main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build Sleepless
+        run: |
+          xcodebuild \
+            -project sleepless.xcodeproj \
+            -scheme sleepless \
+            -configuration Release \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Package DMG
+        run: |
+          rm -rf dist
+          mkdir -p dist/dmg
+
+          ditto "build/Build/Products/Release/Sleepless.app" "dist/dmg/Sleepless.app"
+          ln -s /Applications "dist/dmg/Applications"
+
+          hdiutil create \
+            -volname "Sleepless" \
+            -srcfolder "dist/dmg" \
+            -ov \
+            -format UDZO \
+            "dist/Sleepless.dmg"
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Sleepless.app
+          path: build/Build/Products/Release/Sleepless.app
+          if-no-files-found: error
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Sleepless.dmg
+          path: dist/Sleepless.dmg
+          if-no-files-found: error

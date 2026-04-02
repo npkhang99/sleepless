@@ -28,7 +28,24 @@ Sleepless uses `IOPMAssertionCreateWithName` with `kIOPMAssertionTypeNoDisplaySl
 
 ## Building
 
-Open `sleepless.xcodeproj` in Xcode and build (Cmd+B).
+Build a production `.app` bundle:
+
+```bash
+make build
+```
+
+Package the app into a `.dmg`:
+
+```bash
+make package
+```
+
+Outputs:
+
+- `build/Build/Products/Release/Sleepless.app`
+- `dist/Sleepless.dmg`
+
+You can still open `sleepless.xcodeproj` in Xcode and build with Cmd+B.
 
 ## License
 
