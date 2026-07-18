@@ -64,7 +64,7 @@ Use the `Release` workflow in GitHub Actions and run it manually.
 
 Required inputs:
 
-- `tag` such as `v1.0.0`
+- `tag` such as `v0.0.2`
 - `title` for the GitHub release
 
 Optional inputs:
