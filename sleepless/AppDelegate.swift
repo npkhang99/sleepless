@@ -51,14 +51,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if event.type == .rightMouseUp {
             showMenu()
         } else {
-            toggleSleepPrevention()
+            cycleMode()
         }
     }
 
-    private func toggleSleepPrevention() {
+    private func cycleMode() {
         guard !sleepManager.isChanging else { return }
 
-        sleepManager.toggle { result in
+        sleepManager.cycle { result in
             self.updateIcon()
             if case .failure(let error) = result {
                 self.presentError(error)

@@ -12,6 +12,14 @@ enum SleepMode: Int {
     case lidClosed
 
     var isAwake: Bool { self != .off }
+
+    var next: SleepMode {
+        switch self {
+        case .off: return .lidOpen
+        case .lidOpen: return .lidClosed
+        case .lidClosed: return .off
+        }
+    }
 }
 
 enum SleepManagerError: LocalizedError {
@@ -38,8 +46,8 @@ final class SleepManager {
         mode = Self.isSystemSleepDisabled() ? .lidClosed : .off
     }
 
-    func toggle(completion: @escaping (Result<Void, Error>) -> Void) {
-        setMode(mode == .off ? .lidOpen : .off, completion: completion)
+    func cycle(completion: @escaping (Result<Void, Error>) -> Void) {
+        setMode(mode.next, completion: completion)
     }
 
     func setMode(_ newMode: SleepMode, completion: @escaping (Result<Void, Error>) -> Void) {
