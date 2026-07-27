@@ -87,10 +87,10 @@ make release TAG=v0.0.4
 This builds, signs, packages, and then creates the GitHub release, or uploads to
 it when the tag already exists. It needs the `gh` CLI to be logged in.
 
-It attaches:
-
-- `Sleepless-<tag>.app.zip`
-- `Sleepless-<tag>.dmg`
+It attaches `Sleepless-<tag>.dmg`. The DMG is the only release asset, because the
+background helper registers a launchd job that points inside the app bundle.
+Installing into `/Applications`, which the DMG makes the obvious move, keeps that
+path stable.
 
 Releases are not built in CI. A GitHub runner has no signing certificate and can
 only sign ad-hoc, which makes macOS ask for helper approval after every update.

@@ -27,7 +27,6 @@ endif
 
 TAG ?=
 RELEASE_TITLE ?= $(APP_NAME) $(TAG)
-RELEASE_ZIP := $(DIST_DIR)/$(APP_NAME)-$(TAG).app.zip
 RELEASE_DMG := $(DIST_DIR)/$(APP_NAME)-$(TAG).dmg
 
 .PHONY: build sign package install release clean
@@ -77,15 +76,14 @@ release:
 		exit 1; \
 	fi
 	$(MAKE) package
-	rm -f "$(RELEASE_ZIP)" "$(RELEASE_DMG)"
-	ditto -c -k --sequesterRsrc --keepParent "$(APP_BUNDLE)" "$(RELEASE_ZIP)"
+	rm -f "$(RELEASE_DMG)"
 	cp "$(DMG_PATH)" "$(RELEASE_DMG)"
 	@if gh release view "$(TAG)" >/dev/null 2>&1; then \
 		echo "updating existing release $(TAG)"; \
-		gh release upload "$(TAG)" "$(RELEASE_ZIP)" "$(RELEASE_DMG)" --clobber; \
+		gh release upload "$(TAG)" "$(RELEASE_DMG)" --clobber; \
 	else \
 		echo "creating release $(TAG)"; \
-		gh release create "$(TAG)" "$(RELEASE_ZIP)" "$(RELEASE_DMG)" \
+		gh release create "$(TAG)" "$(RELEASE_DMG)" \
 			--target "$$(git rev-parse HEAD)" \
 			--title "$(RELEASE_TITLE)" \
 			--generate-notes; \
