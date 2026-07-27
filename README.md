@@ -78,7 +78,22 @@ to approve the helper again after each update.
 
 ## Releasing
 
+Publish from your own Mac so the assets carry your signing identity:
+
+```bash
+make release TAG=v0.0.4
+```
+
+This builds, signs, packages, and then creates the GitHub release, or uploads to
+it when the tag already exists. It needs the `gh` CLI to be logged in.
+
+### Releasing from GitHub Actions
+
 Use the `Release` workflow in GitHub Actions and run it manually.
+
+The runner has no signing certificate, so its builds are ad-hoc signed. They
+work, but macOS asks you to approve the background helper again after every
+update. Prefer `make release` unless you cannot reach your Mac.
 
 Required inputs:
 

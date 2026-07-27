@@ -25,7 +25,12 @@ ifeq ($(strip $(CODESIGN_IDENTITY)),)
 CODESIGN_IDENTITY := -
 endif
 
-.PHONY: build sign package install clean
+TAG ?=
+RELEASE_TITLE ?= $(APP_NAME) $(TAG)
+RELEASE_ZIP := $(DIST_DIR)/$(APP_NAME)-$(TAG).app.zip
+RELEASE_DMG := $(DIST_DIR)/$(APP_NAME)-$(TAG).dmg
+
+.PHONY: build sign package install release clean
 
 build:
 	xcodebuild \
@@ -62,6 +67,29 @@ package: build
 		-ov \
 		-format UDZO \
 		"$(DMG_PATH)"
+
+# Publishes from this Mac so the assets keep the local signing identity.
+# The GitHub Actions runner has no certificate and can only sign ad-hoc, which
+# makes macOS ask for helper approval again after every update.
+release:
+	@if [[ -z "$(TAG)" ]]; then \
+		echo "usage: make release TAG=v0.0.4"; \
+		exit 1; \
+	fi
+	$(MAKE) package
+	rm -f "$(RELEASE_ZIP)" "$(RELEASE_DMG)"
+	ditto -c -k --sequesterRsrc --keepParent "$(APP_BUNDLE)" "$(RELEASE_ZIP)"
+	cp "$(DMG_PATH)" "$(RELEASE_DMG)"
+	@if gh release view "$(TAG)" >/dev/null 2>&1; then \
+		echo "updating existing release $(TAG)"; \
+		gh release upload "$(TAG)" "$(RELEASE_ZIP)" "$(RELEASE_DMG)" --clobber; \
+	else \
+		echo "creating release $(TAG)"; \
+		gh release create "$(TAG)" "$(RELEASE_ZIP)" "$(RELEASE_DMG)" \
+			--target "$$(git rev-parse HEAD)" \
+			--title "$(RELEASE_TITLE)" \
+			--generate-notes; \
+	fi
 
 clean:
 	rm -rf "$(DERIVED_DATA)" "$(DIST_DIR)"
