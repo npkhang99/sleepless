@@ -87,28 +87,14 @@ make release TAG=v0.0.4
 This builds, signs, packages, and then creates the GitHub release, or uploads to
 it when the tag already exists. It needs the `gh` CLI to be logged in.
 
-### Releasing from GitHub Actions
-
-Use the `Release` workflow in GitHub Actions and run it manually.
-
-The runner has no signing certificate, so its builds are ad-hoc signed. They
-work, but macOS asks you to approve the background helper again after every
-update. Prefer `make release` unless you cannot reach your Mac.
-
-Required inputs:
-
-- `tag` such as `v0.0.2`
-- `title` for the GitHub release
-
-Optional inputs:
-
-- `notes` to override auto-generated release notes
-- `prerelease` to mark the release as a prerelease
-
-The workflow builds the app, packages a DMG, creates a GitHub Release, and attaches:
+It attaches:
 
 - `Sleepless-<tag>.app.zip`
 - `Sleepless-<tag>.dmg`
+
+Releases are not built in CI. A GitHub runner has no signing certificate and can
+only sign ad-hoc, which makes macOS ask for helper approval after every update.
+The `Build` workflow only checks that the project compiles.
 
 ## License
 
