@@ -7,7 +7,7 @@ A lightweight macOS menu bar app with separate open-lid and closed-lid sleep pre
 - **Lid Open mode** — Prevents display and idle system sleep using a temporary IOKit assertion
 - **Lid Closed mode** — Keeps the Mac running even after its lid is closed
 - **Preserves session state** — Sleepless does not lock or unlock the Mac when the lid closes
-- **One-click toggle** — Left-click toggles Lid Open mode on/off
+- **One-click cycle** — Left-click cycles Off → Lid Open → Lid Closed → Off
 - **Mode selection** — Right-click to select Off, Lid Open, or Lid Closed mode
 - **Menu bar only** — No Dock icon, no windows, just a simple menu bar utility
 - **Single instance** — Only one instance of the app can run at a time
@@ -56,7 +56,25 @@ Outputs:
 - `build/Build/Products/Release/Sleepless.app`
 - `dist/Sleepless.dmg`
 
+Install the build into `/Applications` and restart the app:
+
+```bash
+make install
+```
+
 You can still open `sleepless.xcodeproj` in Xcode and build with Cmd+B.
+
+### Code signing
+
+The build is always signed, because `SMAppService` refuses to register the
+background helper unless the app bundle seals the daemon plist with a signature.
+
+`make build` picks the first Developer ID Application or Apple Development
+identity in your keychain, and falls back to ad-hoc signing when there is none.
+Override it with `make build CODESIGN_IDENTITY="..."`.
+
+Ad-hoc builds work, but their signature changes on every build, so macOS asks you
+to approve the helper again after each update.
 
 ## Releasing
 

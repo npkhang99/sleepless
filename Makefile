@@ -10,8 +10,22 @@ APP_BUNDLE := $(BUILD_PRODUCTS_DIR)/$(APP_NAME).app
 DIST_DIR := dist
 DMG_STAGING_DIR := $(DIST_DIR)/dmg
 DMG_PATH := $(DIST_DIR)/$(APP_NAME).dmg
+HELPER_LABEL := com.curoa99.sleepless.helper.v2
+HELPER_BINARY := $(APP_BUNDLE)/Contents/Resources/$(HELPER_LABEL)
+INSTALL_PATH := /Applications/$(APP_NAME).app
 
-.PHONY: build package clean
+# SMAppService refuses to register the helper unless the app bundle is signed,
+# because the daemon plist must be sealed by the signature. Ad-hoc signing is
+# enough for that, so CI machines without a certificate still produce a working
+# build — the user just has to re-approve the helper after each update.
+CODESIGN_IDENTITY ?= $(shell security find-identity -v -p codesigning | \
+	awk '/Developer ID Application|Apple Development/ { print $$2; exit }')
+
+ifeq ($(strip $(CODESIGN_IDENTITY)),)
+CODESIGN_IDENTITY := -
+endif
+
+.PHONY: build sign package install clean
 
 build:
 	xcodebuild \
@@ -23,6 +37,19 @@ build:
 		CODE_SIGNING_ALLOWED=NO \
 		CODE_SIGNING_REQUIRED=NO \
 		build
+	$(MAKE) sign
+
+sign:
+	codesign --force --options runtime --sign "$(CODESIGN_IDENTITY)" "$(HELPER_BINARY)"
+	codesign --force --options runtime --sign "$(CODESIGN_IDENTITY)" "$(APP_BUNDLE)"
+	codesign --verify --strict "$(APP_BUNDLE)"
+
+install: build
+	osascript -e 'tell application "$(APP_NAME)" to quit' 2>/dev/null || true
+	sleep 1
+	rm -rf "$(INSTALL_PATH)"
+	ditto "$(APP_BUNDLE)" "$(INSTALL_PATH)"
+	open -a "$(INSTALL_PATH)"
 
 package: build
 	rm -rf "$(DMG_STAGING_DIR)" "$(DMG_PATH)"

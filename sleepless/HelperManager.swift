@@ -61,10 +61,17 @@ final class HelperManager {
 
     var isUsable: Bool { state == .enabled }
 
+    // kSMErrorAlreadyRegistered — the daemon is registered and its job is loaded.
+    private static let alreadyRegisteredCode = 12
+
+    /// Registers on every launch. A status of `.enabled` only means the record exists;
+    /// the launchd job can still be missing, and registering again reloads it.
     func registerIfNeeded() {
-        guard state != .enabled, state != .awaitingApproval else { return }
+        guard state != .awaitingApproval else { return }
         do {
             try service.register()
+        } catch let error as NSError where error.code == Self.alreadyRegisteredCode {
+            return
         } catch {
             NSLog("Sleepless: helper registration failed: \((error as NSError).localizedDescription)")
         }
