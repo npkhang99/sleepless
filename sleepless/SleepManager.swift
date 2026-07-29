@@ -36,14 +36,24 @@ enum SleepManagerError: LocalizedError {
 @Observable
 final class SleepManager {
     private(set) var mode: SleepMode
+    private(set) var keepsMonitorOnInLidClosedMode: Bool
     private(set) var isChanging = false
     private var assertionID: IOPMAssertionID = 0
     private let helper = HelperManager.shared
+    private static let keepsMonitorOnKey = "keepsMonitorOnInLidClosedMode"
 
     var isAwake: Bool { mode.isAwake }
 
     init() {
         mode = Self.isSystemSleepDisabled() ? .lidClosed : .off
+        let defaults = UserDefaults.standard
+        keepsMonitorOnInLidClosedMode = defaults.object(
+            forKey: Self.keepsMonitorOnKey
+        ) as? Bool ?? true
+
+        if mode == .lidClosed, keepsMonitorOnInLidClosedMode {
+            _ = createDisplayAssertion(reason: "Sleepless: Keeping monitor on in Lid Closed mode")
+        }
     }
 
     func cycle(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -71,25 +81,67 @@ final class SleepManager {
         completion(applyLocalMode(newMode))
     }
 
+    func toggleMonitorInLidClosedMode() -> Result<Void, Error> {
+        guard mode == .lidClosed else { return .success(()) }
+
+        if keepsMonitorOnInLidClosedMode {
+            releaseAssertion()
+            keepsMonitorOnInLidClosedMode = false
+        } else {
+            let result = createDisplayAssertion(
+                reason: "Sleepless: Keeping monitor on in Lid Closed mode"
+            )
+            guard case .success = result else { return result }
+            keepsMonitorOnInLidClosedMode = true
+        }
+
+        UserDefaults.standard.set(
+            keepsMonitorOnInLidClosedMode,
+            forKey: Self.keepsMonitorOnKey
+        )
+        return .success(())
+    }
+
     private func applyLocalMode(_ newMode: SleepMode) -> Result<Void, Error> {
         releaseAssertion()
 
         if newMode == .lidOpen {
-            let reason = "Sleepless: Keeping Mac awake while the lid is open" as CFString
-            let result = IOPMAssertionCreateWithName(
-                kIOPMAssertionTypeNoDisplaySleep as CFString,
-                IOPMAssertionLevel(kIOPMAssertionLevelOn),
-                reason,
-                &assertionID
+            let result = createDisplayAssertion(
+                type: kIOPMAssertionTypeNoDisplaySleep as CFString,
+                reason: "Sleepless: Keeping Mac awake while the lid is open"
             )
-            guard result == kIOReturnSuccess else {
-                assertionID = 0
+            guard case .success = result else {
                 mode = .off
-                return .failure(SleepManagerError.assertionFailed(result))
+                return result
+            }
+        } else if newMode == .lidClosed, keepsMonitorOnInLidClosedMode {
+            let result = createDisplayAssertion(
+                reason: "Sleepless: Keeping monitor on in Lid Closed mode"
+            )
+            guard case .success = result else {
+                mode = .lidClosed
+                return result
             }
         }
 
         mode = newMode
+        return .success(())
+    }
+
+    private func createDisplayAssertion(
+        type: CFString = kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+        reason: String
+    ) -> Result<Void, Error> {
+        let result = IOPMAssertionCreateWithName(
+            type,
+            IOPMAssertionLevel(kIOPMAssertionLevelOn),
+            reason as CFString,
+            &assertionID
+        )
+        guard result == kIOReturnSuccess else {
+            assertionID = 0
+            return .failure(SleepManagerError.assertionFailed(result))
+        }
         return .success(())
     }
 

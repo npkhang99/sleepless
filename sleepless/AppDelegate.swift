@@ -88,6 +88,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             action: #selector(selectLidClosedMode)
         ))
 
+        if sleepManager.mode == .lidClosed {
+            let monitorItem = NSMenuItem(
+                title: "Keep Monitor On",
+                action: #selector(toggleLidClosedMonitor),
+                keyEquivalent: ""
+            )
+            monitorItem.target = self
+            monitorItem.indentationLevel = 1
+            monitorItem.state = sleepManager.keepsMonitorOnInLidClosedMode ? .on : .off
+            monitorItem.isEnabled = !sleepManager.isChanging
+            menu.addItem(monitorItem)
+        }
+
         if helper.state != .enabled {
             menu.addItem(.separator())
             let helperItem = NSMenuItem(
@@ -118,7 +131,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .lidOpen:
             return "Status: Awake while lid is open"
         case .lidClosed:
-            return "Status: Awake even with lid closed"
+            return sleepManager.keepsMonitorOnInLidClosedMode
+                ? "Status: Awake with lid closed, monitor on"
+                : "Status: Awake even with lid closed"
         }
     }
 
@@ -140,6 +155,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func selectLidClosedMode() {
         setMode(.lidClosed)
+    }
+
+    @objc private func toggleLidClosedMonitor() {
+        let result = sleepManager.toggleMonitorInLidClosedMode()
+        updateIcon()
+        if case .failure(let error) = result {
+            presentError(error)
+        }
     }
 
     @objc private func openHelperApproval() {
@@ -173,7 +196,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             toolTip = "Sleepless is keeping the Mac awake while the lid is open"
         case .lidClosed:
             symbolName = "laptopcomputer"
-            toolTip = "Sleepless is keeping the Mac awake even with the lid closed"
+            toolTip = sleepManager.keepsMonitorOnInLidClosedMode
+                ? "Sleepless is keeping the Mac and monitor awake with the lid closed"
+                : "Sleepless is keeping the Mac awake even with the lid closed"
         }
         statusItem.button?.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "Sleepless")
         statusItem.button?.toolTip = toolTip
