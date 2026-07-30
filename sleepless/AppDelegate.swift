@@ -4,13 +4,21 @@
 //
 
 import AppKit
+import Sparkle
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var statusItem: NSStatusItem!
+    private var isRelaunchingForUpdate = false
     private let sleepManager = SleepManager()
     private let helper = HelperManager.shared
+    private lazy var updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: self,
+        userDriverDelegate: nil
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        _ = updaterController
         helper.registerIfNeeded()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         updateIcon()
@@ -23,6 +31,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        if isRelaunchingForUpdate {
+            return .terminateNow
+        }
+
         switch sleepManager.mode {
         case .off:
             return .terminateNow
@@ -114,6 +126,43 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
+        let updateItem = NSMenuItem(
+            title: "Check for Updates…",
+            action: #selector(checkForUpdates),
+            keyEquivalent: ""
+        )
+        updateItem.target = self
+        updateItem.isEnabled = updaterController.updater.canCheckForUpdates
+        menu.addItem(updateItem)
+
+        let automaticUpdateItem = NSMenuItem(
+            title: "Automatically Install Updates",
+            action: #selector(toggleAutomaticUpdates),
+            keyEquivalent: ""
+        )
+        automaticUpdateItem.target = self
+        automaticUpdateItem.state = updaterController.updater.automaticallyDownloadsUpdates
+            ? .on
+            : .off
+        automaticUpdateItem.isEnabled = updaterController.updater.allowsAutomaticUpdates
+        menu.addItem(automaticUpdateItem)
+
+        menu.addItem(.separator())
+
+        let version = Bundle.main.object(
+            forInfoDictionaryKey: "CFBundleShortVersionString"
+        ) as? String ?? "Unknown"
+        let build = Bundle.main.object(
+            forInfoDictionaryKey: "CFBundleVersion"
+        ) as? String ?? "Unknown"
+        let versionItem = NSMenuItem(
+            title: "Version \(version) (\(build))",
+            action: nil,
+            keyEquivalent: ""
+        )
+        versionItem.isEnabled = false
+        menu.addItem(versionItem)
+
         let quitItem = NSMenuItem(title: "Quit Sleepless", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
@@ -168,6 +217,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func openHelperApproval() {
         helper.registerIfNeeded()
         helper.openApprovalSettings()
+    }
+
+    @objc private func checkForUpdates() {
+        updaterController.checkForUpdates(nil)
+    }
+
+    @objc private func toggleAutomaticUpdates() {
+        updaterController.updater.automaticallyDownloadsUpdates.toggle()
+    }
+
+    func updater(
+        _ updater: SPUUpdater,
+        willInstallUpdateOnQuit item: SUAppcastItem,
+        immediateInstallationBlock immediateInstallHandler: @escaping () -> Void
+    ) -> Bool {
+        DispatchQueue.main.async(execute: immediateInstallHandler)
+        return true
+    }
+
+    func updaterWillRelaunchApplication(_ updater: SPUUpdater) {
+        isRelaunchingForUpdate = true
     }
 
     private func setMode(_ mode: SleepMode) {

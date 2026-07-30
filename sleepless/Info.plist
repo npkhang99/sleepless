@@ -2,11 +2,19 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleDisplayName</key>
-    <string>Sleepless</string>
-    <key>CFBundleName</key>
-    <string>Sleepless</string>
-    <key>LSUIElement</key>
-    <true/>
+	<key>CFBundleDisplayName</key>
+	<string>Sleepless</string>
+	<key>CFBundleName</key>
+	<string>Sleepless</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>$(SU_FEED_URL)</string>
+	<key>SUPublicEDKey</key>
+	<string>5waP0EsHMHtKxVtss9D6HuFDW3qFfiMvbb2+IE19Uo0=</string>
 </dict>
 </plist>

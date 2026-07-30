@@ -11,6 +11,7 @@
 		AA0000020000000000000001 /* SleeplessHelperProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000210000000000000001 /* SleeplessHelperProtocol.swift */; };
 		AA0000030000000000000001 /* SleeplessHelper in Copy Helper Executable */ = {isa = PBXBuildFile; fileRef = AA0000250000000000000001 /* SleeplessHelper */; };
 		AA0000040000000000000001 /* com.curoa99.sleepless.helper.v2.plist in Copy Launchd Plist */ = {isa = PBXBuildFile; fileRef = AA0000230000000000000001 /* com.curoa99.sleepless.helper.v2.plist */; };
+		AA0000050000000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000350000000000000001 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000050000000000000001 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +139,7 @@
 			);
 			name = sleepless;
 			packageProductDependencies = (
+				AA0000350000000000000001 /* Sparkle */,
 			);
 			productName = sleepless;
 			productReference = 0C2401B42F6F087E00D34AD9 /* Sleepless.app */;
@@ -187,6 +190,9 @@
 			);
 			mainGroup = 0C2401AB2F6F087E00D34AD9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA0000340000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0C2401B52F6F087E00D34AD9 /* Products */;
 			projectDirPath = "";
@@ -364,7 +370,7 @@
 				CODE_SIGN_ENTITLEMENTS = sleepless/sleepless.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 7LGX966X8P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -380,11 +386,12 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 0.0.4;
+				MARKETING_VERSION = 0.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.curoa99.sleepless;
 				PRODUCT_NAME = Sleepless;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SU_FEED_URL = "https://github.com/npkhang99/sleepless/releases/latest/download/appcast.xml";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -401,7 +408,7 @@
 				CODE_SIGN_ENTITLEMENTS = sleepless/sleepless.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = 7LGX966X8P;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -417,11 +424,12 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 0.0.4;
+				MARKETING_VERSION = 0.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.curoa99.sleepless;
 				PRODUCT_NAME = Sleepless;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SU_FEED_URL = "https://github.com/npkhang99/sleepless/releases/latest/download/appcast.xml";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -509,6 +517,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA0000340000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA0000350000000000000001 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0000340000000000000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0C2401AC2F6F087E00D34AD9 /* Project object */;
 }
