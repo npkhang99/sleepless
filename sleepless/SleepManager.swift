@@ -107,8 +107,8 @@ final class SleepManager {
 
         if newMode == .lidOpen {
             let result = createDisplayAssertion(
-                type: kIOPMAssertionTypePreventUserIdleSystemSleep as CFString,
-                reason: "Sleepless: Keeping Mac awake while the lid is open"
+                type: kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+                reason: "Sleepless: Keeping the display awake while the lid is open"
             )
             guard case .success = result else {
                 mode = .off
