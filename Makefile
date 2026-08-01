@@ -85,7 +85,7 @@ package: build
 
 appcast:
 	@if [[ -z "$(TAG)" ]]; then \
-		echo "usage: make appcast TAG=v0.0.5"; \
+		echo "usage: make appcast TAG=v0.0.7"; \
 		exit 1; \
 	fi
 	$(MAKE) package
@@ -116,7 +116,7 @@ appcast:
 # makes macOS ask for helper approval again after every update.
 release: appcast
 	@if [[ -z "$(TAG)" ]]; then \
-		echo "usage: make release TAG=v0.0.5"; \
+		echo "usage: make release TAG=v0.0.7"; \
 		exit 1; \
 	fi
 	@if gh release view "$(TAG)" >/dev/null 2>&1; then \

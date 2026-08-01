@@ -10,6 +10,7 @@ A lightweight macOS menu bar app with separate open-lid and closed-lid sleep pre
 - **One-click cycle** — Left-click cycles Off → Lid Open → Lid Closed → Off
 - **Mode selection** — Right-click to select Off, Lid Open, or Lid Closed mode
 - **Automatic updates** — Checks GitHub Releases and can install signed updates automatically
+- **Launch at login** — Optionally starts Sleepless when you sign in to your Mac
 - **Version visibility** — Shows the installed app and build version directly above Quit
 - **Menu bar only** — No Dock icon, no windows, just a simple menu bar utility
 - **Single instance** — Only one instance of the app can run at a time
@@ -90,7 +91,7 @@ Release and verified with the app's EdDSA public key before installation.
 Publish from your own Mac so the assets carry your signing identity:
 
 ```bash
-make release TAG=v0.0.5
+make release TAG=v0.0.7
 ```
 
 This builds, signs, packages, and then creates the GitHub release, or uploads to

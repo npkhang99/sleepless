@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import ServiceManagement
 import Sparkle
 
 final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
@@ -11,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var isRelaunchingForUpdate = false
     private let sleepManager = SleepManager()
     private let helper = HelperManager.shared
+    private let loginItem = SMAppService.mainApp
     private lazy var updaterController = SPUStandardUpdaterController(
         startingUpdater: true,
         updaterDelegate: self,
@@ -126,6 +128,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
         menu.addItem(.separator())
 
+        let launchAtLoginItem = NSMenuItem(
+            title: "Launch at Login",
+            action: #selector(toggleLaunchAtLogin),
+            keyEquivalent: ""
+        )
+        launchAtLoginItem.target = self
+        launchAtLoginItem.state = loginItem.status == .enabled ? .on : .off
+        menu.addItem(launchAtLoginItem)
+
+        menu.addItem(.separator())
+
         let updateItem = NSMenuItem(
             title: "Check for Updates…",
             action: #selector(checkForUpdates),
@@ -227,6 +240,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         updaterController.updater.automaticallyDownloadsUpdates.toggle()
     }
 
+    @objc private func toggleLaunchAtLogin() {
+        do {
+            switch loginItem.status {
+            case .enabled:
+                try loginItem.unregister()
+            case .notRegistered:
+                try loginItem.register()
+            case .requiresApproval:
+                SMAppService.openSystemSettingsLoginItems()
+            case .notFound:
+                throw LoginItemError.unavailable
+            @unknown default:
+                SMAppService.openSystemSettingsLoginItems()
+            }
+        } catch {
+            presentError(error, message: "Sleepless couldn’t change the login setting.")
+        }
+    }
+
     func updater(
         _ updater: SPUUpdater,
         willInstallUpdateOnQuit item: SUAppcastItem,
@@ -274,9 +306,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         statusItem.button?.toolTip = toolTip
     }
 
-    private func presentError(_ error: Error) {
+    private func presentError(
+        _ error: Error,
+        message: String = "Sleepless couldn’t change sleep behavior."
+    ) {
         let alert = NSAlert()
-        alert.messageText = "Sleepless couldn’t change sleep behavior."
+        alert.messageText = message
         alert.informativeText = error.localizedDescription
         alert.alertStyle = .warning
 
@@ -290,5 +325,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             alert.addButton(withTitle: "OK")
             alert.runModal()
         }
+    }
+}
+
+private enum LoginItemError: LocalizedError {
+    case unavailable
+
+    var errorDescription: String? {
+        "The app’s login item is unavailable. Move Sleepless to Applications and try again."
     }
 }

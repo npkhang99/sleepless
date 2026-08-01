@@ -7,9 +7,9 @@
     <key>CFBundleName</key>
     <string>SleeplessHelper</string>
     <key>CFBundleVersion</key>
-    <string>5</string>
+    <string>7</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.0.5</string>
+    <string>0.0.7</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
